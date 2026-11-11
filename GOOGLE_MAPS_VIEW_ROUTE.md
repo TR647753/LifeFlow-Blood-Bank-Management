@@ -1,0 +1,1 @@
+View Route now redirects directly to Google Maps driving directions. Donor routes use profile address if available; Admin delivery uses pickup address if entered. No backend, MongoDB or environment files modified.

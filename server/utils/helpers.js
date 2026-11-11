@@ -1,0 +1,3 @@
+import {Notification,Donor} from '../models/index.js';
+export const notify=async(recipient,role,title,message,request)=>Notification.create({recipient,role,title,message,request});
+export async function alertDonors(request){const donors=await Donor.find({approval:'Approved',available:true,bloodGroup:request.bloodGroup,active:true,...(request.district?{district:new RegExp('^'+request.district.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'$','i')}:{})});await Promise.all(donors.map(d=>notify(d._id,'donor',request.emergency?'Emergency blood request':'New blood request',`${request.units} unit(s) ${request.bloodGroup} needed at ${request.hospitalName}`,request._id)));return donors.length}

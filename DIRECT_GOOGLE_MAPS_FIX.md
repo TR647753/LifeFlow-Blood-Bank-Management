@@ -1,0 +1,1 @@
+View Route uses normal external links to Google Maps driving directions. Clicking does not run Leaflet, Nominatim, OSRM, or any route calculation. Google Maps opens in a new tab. Existing MongoDB and backend untouched. Note: initial dashboard load still requires API requests; Google Maps itself may take time depending on network.

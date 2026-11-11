@@ -1,0 +1,19 @@
+import mongoose from 'mongoose';
+const {Schema,model}=mongoose;
+export const groups=['A+','A-','B+','B-','AB+','AB-','O+','O-'];
+const options={timestamps:true};
+const base={name:{type:String,required:true,trim:true},email:{type:String,required:true,lowercase:true,trim:true,unique:true},password:{type:String,required:true,select:false},phone:{type:String,default:''},age:{type:Number,min:0,max:120},gender:{type:String,default:''},bloodGroup:{type:String,enum:groups},address:String,city:String,district:String,pincode:String,latitude:Number,longitude:Number,active:{type:Boolean,default:true}};
+export const Admin=model('Admin',new Schema({name:String,email:{type:String,unique:true,required:true,lowercase:true},password:{type:String,required:true,select:false},active:{type:Boolean,default:true}},options));
+export const Donor=model('Donor',new Schema({...base,lastDonationDate:Date,available:{type:Boolean,default:true},approval:{type:String,enum:['Pending','Approved','Rejected'],default:'Pending'}},options));
+export const Patient=model('Patient',new Schema({...base,hospitalName:String,hospitalAddress:String},options));
+export const statuses=['Pending','Under Review','Approved','Donor Matched','Fulfilled','Rejected','Cancelled'];
+export const BloodRequest=model('BloodRequest',new Schema({patient:{type:Schema.Types.ObjectId,ref:'Patient',required:true},bloodGroup:{type:String,enum:groups,required:true},units:{type:Number,required:true,min:1,max:100},hospitalName:{type:String,required:true},hospitalAddress:{type:String,required:true},city:String,district:String,contact:{type:String,required:true},requiredDate:{type:Date,required:true},emergency:{type:Boolean,default:false},status:{type:String,enum:statuses,default:'Pending'},donor:{type:Schema.Types.ObjectId,ref:'Donor'},proof:{type:String,default:''},originLat:Number,originLng:Number,destLat:Number,destLng:Number,notes:String,collectionCenter:{type:String,default:""},collectionLat:Number,collectionLng:Number,dispatchStatus:{type:String,enum:['Not Dispatched','Dispatched','Delivered'],default:'Not Dispatched'},dispatchOrigin:String,dispatchedAt:Date,deliveredAt:Date,fulfillmentSource:String},options));
+export const BloodInventory=model('BloodInventory',new Schema({bloodGroup:{type:String,enum:groups,required:true},units:{type:Number,min:0,required:true},collectionDate:{type:Date,required:true},expiryDate:{type:Date,required:true},location:{type:String,required:true},latitude:Number,longitude:Number,proof:String},options));
+BloodInventory.schema.index({bloodGroup:1,expiryDate:1});
+export const DonationHistory=model('DonationHistory',new Schema({donor:{type:Schema.Types.ObjectId,ref:'Donor',required:true},bloodGroup:{type:String,enum:groups,required:true},units:{type:Number,required:true,min:1},donationDate:{type:Date,default:Date.now},inventory:{type:Schema.Types.ObjectId,ref:'BloodInventory'},proof:String},options));
+export const Notification=model('Notification',new Schema({recipient:{type:Schema.Types.ObjectId,required:true},role:{type:String,enum:['admin','donor','patient'],required:true},title:{type:String,required:true},message:String,read:{type:Boolean,default:false},request:{type:Schema.Types.ObjectId,ref:'BloodRequest'}},options));
+
+export const DonationCamp=model('DonationCamp',new Schema({name:{type:String,required:true},address:{type:String,required:true},city:{type:String,required:true},district:String,active:{type:Boolean,default:true},authorized:{type:Boolean,default:false},date:Date},options));
+
+export const CampRegistration=model('CampRegistration',new Schema({camp:{type:Schema.Types.ObjectId,ref:'DonationCamp',required:true},donor:{type:Schema.Types.ObjectId,ref:'Donor',required:true},status:{type:String,enum:['Registered','Cancelled'],default:'Registered'}},options));
+CampRegistration.schema.index({camp:1,donor:1},{unique:true});
